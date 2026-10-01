@@ -431,13 +431,10 @@ python3 -m http.server 8080
 
 <br />
 
----
+
 
 <p align="center"><strong>NEGAR · نگار</strong><br /><sub>Sketch freely. Stay minimal.</sub><br /><br /><a href="#top">↑ Back to top / بازگشت به بالا</a></p>
-```
 
----
 
-**`assets/leo.svg`** — از ریپوی `expense-tracker` بردار و دوباره استفاده کن. همون فایل کار می‌کنه.
 
-اگه خواستی، بنر رو هم خودم به‌صورت SVG کامل برات می‌سازم — فقط بگو.
+
