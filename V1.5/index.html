@@ -2987,7 +2987,6 @@ function onDown(e){
 
   if (e.pointerType === 'mouse' && e.button !== 0 && e.button !== 1) return;
 
-  // Viewer permission gate
   if (collab.active && !collab.isHost && !collab.canDraw){
     var isMiddle = (e.button === 1);
     var isPanGesture = state.space || state.tool === 'hand';
@@ -3479,7 +3478,6 @@ canvas.addEventListener('pointerleave', function(){
   if (state.hoveredId){ state.hoveredId = null; scheduleRender(); }
 });
 
-// Multi-touch pinch zoom
 canvas.addEventListener('touchstart', function(e){
   if (e.touches.length === 2){
     e.preventDefault();
@@ -3534,7 +3532,6 @@ document.addEventListener('pointerdown', function(e){
   if (ctxMenuOpen && !e.target.closest('.ctx-menu')) hideContextMenu();
 }, true);
 
-// WHEEL
 canvas.addEventListener('wheel', function(e){
   e.preventDefault();
   if (e.ctrlKey || e.metaKey){
@@ -4316,14 +4313,12 @@ function loadFromURLHash(){
     var validated = sanitizeElementsList(els);
     if (validated.length === 0) return false;
 
-    // Confirm before overwriting existing content
     var hadContent = state.elements.length > 0;
     if (hadContent){
       if (!confirm('این لینک حاوی یک بوم است. محتوای فعلی شما با آن جایگزین می‌شود. ادامه؟')){
         history.replaceState(null, '', location.pathname);
         return false;
       }
-      // Backup previous content
       try {
         var backup = JSON.stringify(state.elements).slice(0, 4 * 1024 * 1024);
         localStorage.setItem('negar-url-backup', backup);
@@ -4722,7 +4717,6 @@ function updateCollabMembersUI(){
 
   if (countEl) countEl.textContent = members.length;
 
-  // Build with DOM to avoid XSS via names / ids
   container.innerHTML = '';
   for (var k = 0; k < members.length; k++){
     var m = members[k];
@@ -4914,11 +4908,10 @@ function setupHostConn(conn){
     if (!helloReceived && data.type !== 'hello') return;
 
     if (data.type === 'hello'){
-      if (helloReceived) return; // only one hello per connection
+      if (helloReceived) return;
       if (typeof data.clientId !== 'string' || !RE_CLIENT.test(data.clientId)) return;
       if (typeof data.token !== 'string' || !RE_TOKEN.test(data.token)) return;
 
-      // Prevent host impersonation
       if (collab.members[data.clientId] && collab.members[data.clientId].isHost) return;
 
       var online = onlineMemberCount();
@@ -4936,15 +4929,12 @@ function setupHostConn(conn){
         return;
       }
 
-      // Token check for returning clients
       if (existing && existing.token && existing.token !== data.token) {
-        // identity mismatch — reject
         try { conn.send(packMessage({ type: 'rejected', reason: 'identity' })); } catch(e){}
         setTimeout(function(){ try { conn.close(); } catch(e){} }, 300);
         return;
       }
 
-      // Default: new members are viewers
       var canDraw = existing ? !!existing.canDraw : false;
       collab.members[data.clientId] = {
         clientId: data.clientId,
@@ -5122,7 +5112,6 @@ function setupGuestConn(conn){
     if (!data || typeof data.type !== 'string') return;
 
     if (data.type === 'welcome'){
-      // Backup local canvas before overwriting
       var hadContent = state.elements.length > 0;
       if (hadContent){
         try {
@@ -5541,7 +5530,6 @@ document.getElementById('color-input').addEventListener('change', function(){
   if (applyColorToSelection(this.value)) toast('رنگ اعمال شد');
 });
 
-// FILLS
 var fillBtns = document.querySelectorAll('#fills button');
 for (var f = 0; f < fillBtns.length; f++){
   (function(btn){
@@ -5556,7 +5544,6 @@ for (var f = 0; f < fillBtns.length; f++){
   })(fillBtns[f]);
 }
 
-// WIDTHS
 var widthBtns = document.querySelectorAll('#widths button');
 for (var m = 0; m < widthBtns.length; m++){
   (function(btn){
@@ -5572,7 +5559,6 @@ for (var m = 0; m < widthBtns.length; m++){
   })(widthBtns[m]);
 }
 
-// OPACITY
 var opacityInput = document.getElementById('opacity');
 var opacityValue = document.getElementById('opacity-value');
 opacityInput.addEventListener('input', function(){
@@ -5584,7 +5570,6 @@ opacityInput.addEventListener('change', function(){
   if (applyOpacityToSelection(op)) toast('شفافیت اعمال شد');
 });
 
-// PEN STYLES
 var penStyleBtns = document.querySelectorAll('#pen-styles button');
 for (var s = 0; s < penStyleBtns.length; s++){
   (function(btn){
@@ -5600,7 +5585,6 @@ for (var s = 0; s < penStyleBtns.length; s++){
   })(penStyleBtns[s]);
 }
 
-// PRESSURE TOGGLE
 var pressureToggle = document.getElementById('pressure-toggle');
 pressureToggle.checked = state.usePressure;
 pressureToggle.addEventListener('change', function(){
@@ -5609,7 +5593,6 @@ pressureToggle.addEventListener('change', function(){
   toast(state.usePressure ? 'حساسیت فشار فعال' : 'حساسیت فشار غیرفعال');
 });
 
-// TEXT FONT SIZE
 var textSizeBtns = document.querySelectorAll('#text-sizes button');
 for (var ts = 0; ts < textSizeBtns.length; ts++){
   (function(btn){
@@ -5627,7 +5610,6 @@ for (var ts = 0; ts < textSizeBtns.length; ts++){
   })(textSizeBtns[ts]);
 }
 
-// TEXT FORMATS
 var textFmtBtns = document.querySelectorAll('#text-formats button');
 for (var tf = 0; tf < textFmtBtns.length; tf++){
   (function(btn){
@@ -5661,7 +5643,6 @@ function applyToSelectedText(fn){
   return any;
 }
 
-// PANEL
 var panel = document.getElementById('panel');
 document.getElementById('swatch').addEventListener('click', function(e){
   e.stopPropagation();
@@ -5670,7 +5651,6 @@ document.getElementById('swatch').addEventListener('click', function(e){
 panel.addEventListener('click', function(e){ e.stopPropagation(); });
 document.addEventListener('click', function(){ panel.classList.remove('open'); });
 
-// HELP MODAL
 var helpModal = document.getElementById('help-modal');
 function openHelp(){ helpModal.classList.add('open'); }
 function closeHelp(){ helpModal.classList.remove('open'); }
@@ -5678,7 +5658,6 @@ document.getElementById('help-btn').addEventListener('click', openHelp);
 document.getElementById('help-close').addEventListener('click', closeHelp);
 document.getElementById('help-backdrop').addEventListener('click', closeHelp);
 
-// SIDE PANELS
 function openPanel(id){
   document.querySelectorAll('.side-panel').forEach(function(p){
     p.classList.toggle('open', p.id === id);
@@ -5706,14 +5685,15 @@ document.querySelectorAll('[data-close]').forEach(function(btn){
   });
 });
 
-// ACTIONS
 document.getElementById('undo').addEventListener('click', undo);
 document.getElementById('redo').addEventListener('click', redo);
 
+// ═════════════════════════════════════════════════════════
+// پاک کردن همه — بدون پاپ‌آپ تأیید
+// ═════════════════════════════════════════════════════════
 document.getElementById('clear').addEventListener('click', function(){
   if (!state.elements.length) return;
   if (!canEdit()){ denyEdit(); return; }
-  if (!confirm('همه‌ی محتوای بوم پاک شود؟ این عمل با Ctrl+Z قابل بازگشت است اما تاریخچه با ریفرش از بین می‌رود.')) return;
   state.elements = [];
   state.selected = {};
   imageCache = {};
@@ -5721,7 +5701,7 @@ document.getElementById('clear').addEventListener('click', function(){
   scheduleRender();
   scheduleRenderLayers();
   updateSelectionIndicator();
-  toast('پاک شد');
+  toast('پاک شد — برای بازگردانی Ctrl+Z');
 });
 
 document.getElementById('export').addEventListener('click', exportPNG);
@@ -5729,7 +5709,6 @@ document.getElementById('export-pdf').addEventListener('click', exportToPDF);
 document.getElementById('export-svg').addEventListener('click', exportSVG);
 document.getElementById('theme').addEventListener('click', toggleTheme);
 
-// Share UI
 document.getElementById('share-btn').addEventListener('click', function(){
   document.getElementById('share-modal').classList.add('open');
 });
@@ -5757,7 +5736,6 @@ document.getElementById('negar-input').addEventListener('change', function(e){
   document.getElementById('share-modal').classList.remove('open');
 });
 
-// Collab UI
 document.getElementById('collab-btn').addEventListener('click', function(){
   document.getElementById('collab-modal').classList.add('open');
   updateCollabBadge();
@@ -5808,7 +5786,6 @@ document.getElementById('collab-copy-code').addEventListener('click', function()
   });
 });
 
-// UPLOAD
 document.getElementById('upload-btn').addEventListener('click', function(){
   if (!canEdit()){ denyEdit(); return; }
   fileInput.click();
@@ -5837,7 +5814,6 @@ function processFiles(files){
   return chain;
 }
 
-// DRAG & DROP
 var dragCounter = 0;
 window.addEventListener('dragenter', function(e){
   e.preventDefault();
@@ -5874,7 +5850,6 @@ window.addEventListener('drop', function(e){
   }
 });
 
-// ZOOM
 document.getElementById('zoom-in').addEventListener('click', function(){
   zoomAt(window.innerWidth / 2, window.innerHeight / 2, 1.2);
 });
@@ -5896,7 +5871,6 @@ function zoomAt(sx, sy, factor){
   scheduleRender();
 }
 
-// TOAST
 function toast(msg, isError){
   var t = document.createElement('div');
   t.className = 'toast' + (isError ? ' error' : '');
@@ -5910,7 +5884,6 @@ function toast(msg, isError){
   }, 2200);
 }
 
-// PASTE
 document.addEventListener('paste', function(e){
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
@@ -6119,7 +6092,6 @@ document.addEventListener('keyup', function(e){
   }
 });
 
-// THEME
 if (localStorage.getItem('theme') === 'dark'){
   document.body.classList.add('dark');
 }
